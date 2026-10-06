@@ -1,16 +1,10 @@
-FROM node:lts-buster
+FROM node:lts-slim
 
-# Set working directory
 WORKDIR /app
-
-# Copy all local files to container
+COPY package*.json ./
+RUN npm install --omit=dev
 COPY . .
 
-# Install dependencies
-RUN npm install && npm install -g pm2
-
-# Expose the port your app listens on
+ENV NODE_ENV=production
 EXPOSE 9090
-
-# Start the app
 CMD ["npm", "start"]
