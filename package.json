@@ -3,7 +3,7 @@
   "version": "15.0.0",
   "private": true,
   "type": "module",
-  "description": "A small, command-driven WhatsApp bot built with Baileys",
+  "description": "A WhatsApp personal-chat bot with AI replies",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
@@ -17,6 +17,7 @@
     "@whiskeysockets/baileys": "7.0.0-rc.9",
     "dotenv": "^16.0.0",
     "express": "^5.1.0",
+    "openai": "^6.0.0",
     "pino": "^9.7.0",
     "pm2": "^6.0.8"
   },
