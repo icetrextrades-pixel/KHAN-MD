@@ -1,6 +1,6 @@
 {
   "name": "KHAN-MD",
-  "description": "A small command-driven WhatsApp bot built with Baileys",
+  "description": "A WhatsApp bot with private-chat auto replies and basic commands",
   "logo": "https://files.catbox.moe/6zd0ru.jpg",
   "keywords": [
     "KHAN-MD",
@@ -29,6 +29,21 @@
       "description": "Baileys log level",
       "required": false,
       "value": "warn"
+    },
+    "AUTO_REPLY": {
+      "description": "Reply to incoming private chats only",
+      "required": false,
+      "value": "true"
+    },
+    "AUTO_REPLY_MESSAGE": {
+      "description": "Text sent as the automatic reply",
+      "required": false,
+      "value": "Thanks for your message! I’ll get back to you as soon as I can."
+    },
+    "AUTO_REPLY_COOLDOWN_HOURS": {
+      "description": "Hours to wait before auto-replying again in the same private chat",
+      "required": false,
+      "value": "24"
     }
   }
 }

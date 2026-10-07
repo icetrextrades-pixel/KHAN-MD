@@ -5,15 +5,26 @@ import makeWASocket, {
   useMultiFileAuthState,
 } from '@whiskeysockets/baileys';
 import pino from 'pino';
+import { isPrivateChat } from './src/message-routing.js';
 
 const port = Number(process.env.PORT || 9090);
 const prefix = process.env.PREFIX || '.';
 const authDirectory = process.env.AUTH_DIR || './auth_info';
 const phoneNumber = (process.env.PHONE_NUMBER || '').replace(/\D/g, '');
+const autoReplyEnabled = (process.env.AUTO_REPLY || 'true').toLowerCase() === 'true';
+const autoReplyMessage =
+  process.env.AUTO_REPLY_MESSAGE ||
+  'Thanks for your message! I’ll get back to you as soon as I can.';
+const configuredCooldownHours = Number(process.env.AUTO_REPLY_COOLDOWN_HOURS || 24);
+const autoReplyCooldownMs =
+  (Number.isFinite(configuredCooldownHours)
+    ? Math.min(168, Math.max(1, configuredCooldownHours))
+    : 24) * 60 * 60 * 1000;
 
 let connected = false;
 let reconnectTimer;
 let pairingCodeRequested = false;
+const autoReplySentAt = new Map();
 
 const app = express();
 app.get('/', (_request, response) => {
@@ -58,28 +69,47 @@ async function handleMessages(sock, event) {
 
   for (const message of event.messages) {
     const chat = message.key.remoteJid;
-    if (!chat || message.key.fromMe || chat === 'status@broadcast') continue;
+    if (!chat || message.key.fromMe || !isPrivateChat(chat)) continue;
 
     const text = getMessageText(message);
-    if (!text.startsWith(prefix)) continue;
+    if (text.startsWith(prefix)) {
+      const [command] = text.slice(prefix.length).trim().split(/\s+/);
+      const name = (command || '').toLowerCase();
+      let reply;
 
-    const [command] = text.slice(prefix.length).trim().split(/\s+/);
-    const name = (command || '').toLowerCase();
-    let reply;
+      if (name === 'ping') {
+        reply = 'Pong! KHAN-MD is online.';
+      } else if (name === 'help') {
+        reply = [
+          '*KHAN-MD commands*',
+          prefix + 'ping — check whether the bot is online',
+          prefix + 'help — show this command list',
+        ].join('\n');
+      }
 
-    if (name === 'ping') {
-      reply = 'Pong! KHAN-MD is online.';
-    } else if (name === 'help') {
-      reply = [
-        '*KHAN-MD commands*',
-        prefix + 'ping — check whether the bot is online',
-        prefix + 'help — show this command list',
-      ].join('\n');
-    } else {
-      continue;
+      if (reply) {
+        await sock.sendMessage(chat, { text: reply }, { quoted: message });
+        continue;
+      }
     }
 
-    await sock.sendMessage(chat, { text: reply }, { quoted: message });
+    if (!autoReplyEnabled) continue;
+
+    const now = Date.now();
+    const lastReplyAt = autoReplySentAt.get(chat) || 0;
+    if (now - lastReplyAt < autoReplyCooldownMs) continue;
+
+    autoReplySentAt.set(chat, now);
+    try {
+      await sock.sendMessage(
+        chat,
+        { text: autoReplyMessage },
+        { quoted: message },
+      );
+    } catch (error) {
+      if (autoReplySentAt.get(chat) === now) autoReplySentAt.delete(chat);
+      throw error;
+    }
   }
 }
 

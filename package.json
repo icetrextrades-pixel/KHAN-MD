@@ -10,7 +10,8 @@
     "start:pm2": "pm2 start index.js --name KHAN-MD",
     "stop": "pm2 stop KHAN-MD",
     "restart": "pm2 restart KHAN-MD",
-    "check": "node --check index.js"
+    "check": "node --check index.js",
+    "test": "node --test"
   },
   "dependencies": {
     "@whiskeysockets/baileys": "7.0.0-rc.9",
