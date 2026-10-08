@@ -130,7 +130,7 @@ async function replyToMessage(sock, message, chat) {
         ...history,
         { role: 'user', content: text },
       ],
-      max_tokens: 220,
+      max_completion_tokens: 220,
     });
     const reply = response.choices[0]?.message?.content?.trim();
 
