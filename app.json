@@ -1,6 +1,6 @@
 {
   "name": "KHAN-MD",
-  "description": "A WhatsApp bot with AI replies in private chats and basic commands",
+  "description": "A WhatsApp bot with Groq AI replies in private chats and basic commands",
   "logo": "https://files.catbox.moe/6zd0ru.jpg",
   "keywords": [
     "KHAN-MD",
@@ -35,15 +35,15 @@
       "required": false,
       "value": "true"
     },
-    "OPENAI_API_KEY": {
-      "description": "OpenAI API key used to generate chat replies. Keep this secret.",
+    "GROQ_API_KEY": {
+      "description": "Groq API key used to generate chat replies. Keep this secret.",
       "required": false,
       "value": ""
     },
-    "OPENAI_MODEL": {
-      "description": "OpenAI model used for chat replies",
+    "GROQ_MODEL": {
+      "description": "Groq model used for chat replies",
       "required": false,
-      "value": "gpt-6-luna"
+      "value": "openai/gpt-oss-20b"
     },
     "TIME_ZONE": {
       "description": "Timezone used for greeting dayparts",
