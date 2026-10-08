@@ -2,14 +2,15 @@
 
 KHAN-MD is a WhatsApp bot built with Baileys. It replies to one-to-one chats
 only; groups, status updates, and newsletters are ignored. It answers `hey` or
-`hesy` with a time-appropriate greeting, and uses the OpenAI API for other
-messages when an API key is configured.
+`hesy` with a time-appropriate greeting, and uses Groq for other messages when
+a Groq API key is configured.
 
 AI replies use a casual, friendly voice with occasional Shona phrases. The bot
 keeps up to six recent message-and-reply turns per chat in memory while it is
 running. It does not save that chat history to disk, and the history is cleared
-when the process restarts. Message text is sent to OpenAI to generate AI
-replies; API requests use `store: false`.
+when the process restarts. Message text is sent to Groq to generate AI replies.
+Groq says inference data is not retained by default, though it may temporarily
+log inputs and outputs for reliability or abuse investigations.
 
 ## Run it
 
@@ -19,8 +20,8 @@ Use Node.js 20 or later.
 2. Copy `.env.example` to `.env` and set `PHONE_NUMBER` to the WhatsApp number
    to link, including country code and digits only. For example, a Zimbabwe
    number starts with `263`.
-3. Add your OpenAI API key to `OPENAI_API_KEY` in `.env` if you want AI replies.
-   Keep the key private and do not commit `.env`.
+3. Create a free Groq API key and add it to `GROQ_API_KEY` in `.env` if you want
+   AI replies. Keep the key private and do not commit `.env`.
 4. Run `npm start`.
 5. Copy the pairing code from the terminal and enter it in WhatsApp under
    **Linked devices → Link with phone number**.
@@ -37,9 +38,11 @@ service that stays online.
 
 - `AUTO_REPLY=true` enables replies in private chats. Set it to `false` to
   disable automatic replies; `.ping` and `.help` still work.
-- `OPENAI_API_KEY` enables AI answers. Without it, greeting replies still work,
+- `GROQ_API_KEY` enables AI answers. Without it, greeting replies still work,
   while other messages are ignored.
-- `OPENAI_MODEL` selects the OpenAI model (default `gpt-6-luna`).
+- `GROQ_MODEL` selects the Groq model (default `openai/gpt-oss-20b`).
+- Groq's free plan has request and token limits. AI replies may pause until the
+  quota resets if those limits are reached; a paid plan is optional.
 - `TIME_ZONE` controls greeting dayparts (default `Africa/Harare`). For example,
   a greeting is “Hie, good morning, what's up?” in the morning and switches to
   “good afternoon” after midday.
