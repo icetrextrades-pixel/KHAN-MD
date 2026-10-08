@@ -20,9 +20,12 @@ const authDirectory = process.env.AUTH_DIR || './auth_info';
 const phoneNumber = (process.env.PHONE_NUMBER || '').replace(/\D/g, '');
 const autoReplyEnabled = (process.env.AUTO_REPLY || 'true').toLowerCase() === 'true';
 const timeZone = process.env.TIME_ZONE || 'Africa/Harare';
-const aiModel = process.env.OPENAI_MODEL || 'gpt-6-luna';
-const openai = process.env.OPENAI_API_KEY
-  ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+const aiModel = process.env.GROQ_MODEL || 'openai/gpt-oss-20b';
+const groq = process.env.GROQ_API_KEY
+  ? new OpenAI({
+      apiKey: process.env.GROQ_API_KEY,
+      baseURL: 'https://api.groq.com/openai/v1',
+    })
   : null;
 
 let connected = false;
@@ -117,17 +120,19 @@ async function replyToMessage(sock, message, chat) {
     return;
   }
 
-  if (!openai) return;
+  if (!groq) return;
 
   try {
-    const response = await openai.responses.create({
+    const response = await groq.chat.completions.create({
       model: aiModel,
-      instructions: personaInstructions,
-      input: [...history, { role: 'user', content: text }],
-      max_output_tokens: 220,
-      store: false,
+      messages: [
+        { role: 'system', content: personaInstructions },
+        ...history,
+        { role: 'user', content: text },
+      ],
+      max_tokens: 220,
     });
-    const reply = response.output_text?.trim();
+    const reply = response.choices[0]?.message?.content?.trim();
 
     if (!reply) throw new Error('The AI returned an empty reply.');
 
@@ -222,6 +227,6 @@ startBot().catch((error) => {
   process.exit(1);
 });
 
-if (!openai && autoReplyEnabled) {
-  console.warn('OPENAI_API_KEY is not set; AI replies are disabled. Greeting replies still work.');
+if (!groq && autoReplyEnabled) {
+  console.warn('GROQ_API_KEY is not set; AI replies are disabled. Greeting replies still work.');
 }
